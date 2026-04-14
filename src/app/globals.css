@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-space-grotesk: var(--font-space-grotesk);
+  --font-manrope: var(--font-manrope);
+  
+  --color-accent: #00ff88;
+  --color-accent-glow: rgba(0, 255, 136, 0.15);
+  --color-card: #141414;
+  --color-surface-low: #131313;
+  --color-surface-container: #1a1919;
+  --color-surface-highest: #262626;
+}
+
+:root {
+  --background: #0e0e0e;
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+h1, h2, h3, h4, .display-font {
+  font-family: var(--font-space-grotesk), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* HUD Accents */
+.hud-glow {
+  box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: .7;
+    transform: scale(1.05);
+  }
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
