@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGeminiModel } from '@/lib/gemini';
+import { geminiService } from '@/services/gemini';
 import { calculateCategory } from '@/lib/scoring';
 
 export async function POST(req: NextRequest) {
   try {
-    const { image, description } = await req.json();
+    const body = await req.json();
+    const { image, description } = body;
 
+    // SECURITY: Server-side validation of inputs
     if (!image && !description) {
       return NextResponse.json(
         { error: 'Provide either a photo or a description.' },
@@ -13,62 +15,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const model = getGeminiModel();
-    const prompt = `
-      Analyse this meal and return ONLY valid JSON with this exact structure:
-      {
-        "mealName": "string",
-        "calories": number,
-        "protein": number (grams),
-        "carbs": number (grams),
-        "fat": number (grams),
-        "fiber": number (grams),
-        "healthScore": number (0-100, based on nutritional balance, whole foods, fiber content),
-        "improvements": ["3 specific actionable tips to make this meal healthier"]
-      }
-      Be realistic. A burger scores 35-50. A salad with protein scores 75-90.
-    `;
-
-    let result;
+    // SECURITY: Basic image format validation if image is present
     if (image) {
-      // Handle image + optional text
-      const parts = [
-        { text: prompt },
-        {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: image.split(',')[1] || image,
-          },
-        },
-      ];
-      if (description) parts.push({ text: `Context: ${description}` });
-      result = await model.generateContent(parts);
-    } else {
-      // Handle text only
-      result = await model.generateContent([prompt, description]);
+      const mimeMatch = image.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : null;
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (mimeType && !allowedTypes.includes(mimeType)) {
+        return NextResponse.json(
+          { error: 'Invalid file type. Only JPEG, PNG and WEBP are supported.' },
+          { status: 400 }
+        );
+      }
+      
+      // Rough size check (Base64 is ~33% larger than binary)
+      const buffer = Buffer.from(image.split(',')[1] || image, 'base64');
+      if (buffer.length > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: 'File too large. Max 5MB allowed.' },
+          { status: 400 }
+        );
+      }
     }
 
-    const response = await result.response;
-    const text = response.text();
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    const analysis = JSON.parse(jsonStr);
+    // GOOGLE SERVICES: Use the optimized service layer
+    const analysis = await geminiService.analyseMeal(image, description);
 
-    // Add metadata
     const finalResult = {
       ...analysis,
       category: calculateCategory(analysis.healthScore),
       timestamp: new Date().toISOString(),
     };
 
-    return NextResponse.json(finalResult, {
-      headers: {
-        'X-RateLimit': '10/min', // Generic placeholder for rate limiting header
-      },
-    });
-  } catch (error) {
-    console.error('Gemini analysis failed:', error);
+    return NextResponse.json(finalResult);
+  } catch (error: any) {
+    console.error('API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to analyse meal. Please try again.' },
+      { error: error.message || 'Failed to analyse meal. Please try again.' },
       { status: 500 }
     );
   }

@@ -1,0 +1,5 @@
+.git
+.next
+node_modules
+# Do NOT ignore .env.local so it can be used during build
+#.env.local 

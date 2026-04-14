@@ -1,34 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGeminiModel } from '@/lib/gemini';
+import { geminiService } from '@/services/gemini';
 
 export async function POST(req: NextRequest) {
   try {
     const { recentScores, timeOfDay } = await req.json();
 
-    const model = getGeminiModel();
-    const prompt = `
-      User recently had meals with these health scores: ${recentScores.join(', ')}.
-      It is currently ${timeOfDay}.
-      Generate a short, encouraging "health nudge" tip for their next meal.
-      Return ONLY valid JSON with this exact structure:
-      {
-        "message": "string (short & punchy)",
-        "type": "tip|warning|celebration",
-        "timeContext": "breakfast|lunch|dinner|snack|general"
-      }
-    `;
+    if (!recentScores || !Array.isArray(recentScores)) {
+      return NextResponse.json(
+        { error: 'recentScores must be an array of numbers' },
+        { status: 400 }
+      );
+    }
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    const nudge = JSON.parse(jsonStr);
+    const nudge = await geminiService.generateNudge(recentScores, timeOfDay || new Date().toLocaleTimeString());
 
     return NextResponse.json(nudge);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Nudge generation failed:', error);
     return NextResponse.json(
-      { error: 'Failed to generate nudge' },
+      { error: error.message || 'Failed to generate nudge' },
       { status: 500 }
     );
   }

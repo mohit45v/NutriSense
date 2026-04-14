@@ -6,22 +6,29 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.1",
     "firebase": "^11.0.2",
+    "jsdom": "^29.0.2",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "recharts": "^2.13.3"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "recharts": "^2.13.3",
+    "vitest": "^4.1.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.5.0",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",

@@ -1,5 +1,7 @@
 'use client';
 
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import React, { useState, useEffect } from 'react';
 import MealUploader from '@/components/MealUploader';
 import ScoreCard from '@/components/ScoreCard';
@@ -24,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     // Generate initial nudge
     fetchInitialNudge();
-  }, []);
+  }, [history]);
 
   const fetchInitialNudge = async () => {
     try {
@@ -52,27 +54,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0e0e0e] text-white selection:bg-[#00ff88]/30">
-      {/* HUD Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-[#00ff88] rounded-xl hud-glow">
-            <Apple className="text-black" size={24} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight display-font">NutriSense</h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#00ff88] font-bold">Hyper-Precision Lab</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-6">
-          <div className="text-right hidden sm:block">
-            <p className="text-[10px] uppercase text-gray-500 font-bold">Status</p>
-            <p className="text-xs font-bold text-[#00ff88] flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] pulse"></span>
-              Synchronized
-            </p>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
       <div className="pt-28 pb-12 px-6">
@@ -119,10 +101,7 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Footer Decoration */}
-      <footer className="py-12 px-6 border-t border-white/5 opacity-20 text-center">
-        <p className="text-[10px] uppercase tracking-[0.5em] font-bold">NutriSense OS v1.0.4 — Build 2026.04</p>
-      </footer>
+      <Footer />
     </main>
   );
 }

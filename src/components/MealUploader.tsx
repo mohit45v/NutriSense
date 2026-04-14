@@ -68,31 +68,47 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
 
   return (
     <div className="w-full max-w-xl mx-auto glass p-6 rounded-2xl shadow-2xl">
-      <div className="flex space-x-2 mb-6">
+      <div className="flex space-x-2 mb-6" role="tablist">
         <button
           onClick={() => setActiveTab('photo')}
+          role="tab"
+          aria-selected={activeTab === 'photo'}
+          aria-controls="photo-panel"
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
             activeTab === 'photo' ? 'bg-[#00ff88] text-black font-bold' : 'text-gray-400 hover:bg-white/5'
           }`}
         >
-          <Camera size={20} />
+          <Camera size={20} aria-hidden="true" />
           <span>Photo</span>
         </button>
         <button
           onClick={() => setActiveTab('text')}
+          role="tab"
+          aria-selected={activeTab === 'text'}
+          aria-controls="text-panel"
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
             activeTab === 'text' ? 'bg-[#00ff88] text-black font-bold' : 'text-gray-400 hover:bg-white/5'
           }`}
         >
-          <Type size={20} />
+          <Type size={20} aria-hidden="true" />
           <span>Description</span>
         </button>
       </div>
 
       {activeTab === 'photo' ? (
         <div 
+          id="photo-panel"
+          role="tabpanel"
+          tabIndex={0}
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center cursor-pointer hover:border-[#00ff88]/50 transition-all group"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center cursor-pointer hover:border-[#00ff88]/50 transition-all group focus:outline-none focus:ring-2 focus:ring-[#00ff88] focus:border-transparent"
+          aria-label="Upload meal photo"
         >
           <input 
             type="file" 
@@ -100,10 +116,11 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
             onChange={handleFileChange} 
             className="hidden" 
             accept="image/*"
+            aria-hidden="true"
           />
           <div className="flex flex-col items-center space-y-4">
             <div className="p-4 bg-[#00ff88]/10 rounded-full group-hover:scale-110 transition-transform">
-              <Upload className="text-[#00ff88]" size={32} />
+              <Upload className="text-[#00ff88]" size={32} aria-hidden="true" />
             </div>
             <div>
               <p className="text-lg font-medium">Click or Drag Image</p>
@@ -112,19 +129,25 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div 
+          id="text-panel"
+          role="tabpanel"
+          className="space-y-4"
+        >
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What are you eating? e.g. 'Grilled salmon with quinoa and broccoli'"
+            aria-label="Meal description"
             className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-[#00ff88] transition-all"
           />
           <button
             onClick={() => analyzeMeal()}
             disabled={!description || isLoading}
+            aria-label={isLoading ? "Analyzing meal..." : "Analyze meal description"}
             className="w-full py-3 bg-[#00ff88] text-black font-bold rounded-xl hover:bg-[#00dd77] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center space-x-2"
           >
-            {isLoading ? <Loader2 className="animate-spin" /> : <span>Analyse Meal</span>}
+            {isLoading ? <Loader2 className="animate-spin" aria-hidden="true" /> : <span>Analyse Meal</span>}
           </button>
         </div>
       )}
