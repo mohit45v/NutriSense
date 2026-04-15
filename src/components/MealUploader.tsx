@@ -13,6 +13,7 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +24,12 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
       setError('File too large. Max 5MB allowed.');
       return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
 
     await analyzeMeal(file);
   };
@@ -107,7 +114,7 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
               fileInputRef.current?.click();
             }
           }}
-          className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center cursor-pointer hover:border-[#00ff88]/50 transition-all group focus:outline-none focus:ring-2 focus:ring-[#00ff88] focus:border-transparent"
+          className="relative border-2 border-dashed border-white/10 rounded-xl overflow-hidden text-center cursor-pointer hover:border-[#00ff88]/50 transition-all group focus:outline-none focus:ring-2 focus:ring-[#00ff88] focus:border-transparent min-h-[200px] flex items-center justify-center"
           aria-label="Upload meal photo"
         >
           <input 
@@ -118,15 +125,36 @@ export default function MealUploader({ onAnalysisComplete }: MealUploaderProps) 
             accept="image/*"
             aria-hidden="true"
           />
-          <div className="flex flex-col items-center space-y-4">
-            <div className="p-4 bg-[#00ff88]/10 rounded-full group-hover:scale-110 transition-transform">
-              <Upload className="text-[#00ff88]" size={32} aria-hidden="true" />
+          
+          {preview ? (
+            <div className="w-full h-full min-h-[200px] relative">
+              <img 
+                src={preview} 
+                alt="Meal Preview" 
+                className="w-full h-full object-cover rounded-lg"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <p className="text-white font-bold">Replace Image</p>
+              </div>
             </div>
-            <div>
-              <p className="text-lg font-medium">Click or Drag Image</p>
-              <p className="text-sm text-gray-500">Fast, accurate AI analysis</p>
+          ) : (
+            <div className="flex flex-col items-center space-y-4 p-12">
+              <div className="p-4 bg-[#00ff88]/10 rounded-full group-hover:scale-110 transition-transform">
+                <Upload className="text-[#00ff88]" size={32} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-lg font-medium">Click or Drag Image</p>
+                <p className="text-sm text-gray-500">Fast, accurate AI analysis</p>
+              </div>
             </div>
-          </div>
+          )}
+          
+          {isLoading && (
+            <div className="absolute inset-0 bg-[#0e0e0e]/80 flex flex-col items-center justify-center z-10">
+              <Loader2 className="animate-spin text-[#00ff88] mb-2" size={32} />
+              <p className="text-[#00ff88] text-sm font-bold uppercase tracking-widest">Neural Analysis</p>
+            </div>
+          )}
         </div>
       ) : (
         <div 
